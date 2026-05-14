@@ -1,36 +1,166 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+buatkan summary readme.md di next js nya
 
-## Getting Started
+18:11
+Claude responded: nextjs-pemesanan-hotel ← repo ini (port 3000)
+powershell
+$content = @'
+# nextjs-pemesanan-hotel
 
-First, run the development server:
+> Halaman publik hotel berbasis Next.js 14 — mengonsumsi Laravel REST API
+
+![Next.js](https://img.shields.io/badge/frontend-Next.js%2014-black)
+![TypeScript](https://img.shields.io/badge/language-TypeScript-blue)
+![Tailwind](https://img.shields.io/badge/styling-Tailwind%20CSS-38bdf8)
+
+---
+
+## Deskripsi
+
+Frontend publik untuk sistem manajemen hotel **The Redison Blue**. Dibangun dengan Next.js 14 App Router, mengonsumsi REST API dari backend Laravel. Halaman ini khusus untuk tamu hotel (guest) — bukan dashboard internal.
+
+Dashboard CMS (admin & resepsionis) tetap di Laravel Blade: `http://localhost:8000`
+
+---
+
+## Arsitektur Sistem
+nextjs-pemesanan-hotel    ← repo ini (port 3000)
+↕ REST API
+hotel-backend (Laravel)   ← port 8000
+↕
+hotel-mobile (Flutter)    ← nanti
+
+
+---
+
+## Halaman Publik
+
+| Route | Halaman | Status |
+|---|---|---|
+| `/` | Landing page + hero + daftar kamar | ⏳ |
+| `/kamar` | Katalog semua kamar | ⏳ |
+| `/kamar/[id]` | Detail kamar + fasilitas | ⏳ |
+| `/galeri` | Galeri foto hotel | ⏳ |
+| `/artikel` | Daftar artikel & promo | ⏳ |
+| `/artikel/[slug]` | Detail artikel | ⏳ |
+| `/pesan` | Form reservasi publik | ⏳ |
+
+---
+
+## Struktur Folder
+src/
+├── app/
+│   ├── layout.tsx          ← global layout (Navbar + Footer)
+│   ├── page.tsx            ← landing page
+│   ├── kamar/
+│   │   ├── page.tsx
+│   │   └── [id]/page.tsx
+│   ├── galeri/page.tsx
+│   ├── artikel/
+│   │   ├── page.tsx
+│   │   └── [slug]/page.tsx
+│   └── pesan/page.tsx
+├── components/
+│   ├── Navbar.tsx
+│   └── Footer.tsx
+├── lib/
+│   └── api.ts              ← axios wrapper ke Laravel API
+└── types/
+└── index.ts            ← TypeScript interfaces
+
+
+---
+
+## API Endpoints yang Dikonsumsi
+
+Base URL: `http://localhost:8000`
+
+| Method | Endpoint | Dipakai di |
+|---|---|---|
+| GET | `/api/kamar` | `/`, `/kamar` |
+| GET | `/api/kamar/{id}` | `/kamar/[id]` |
+| GET | `/api/galeri` | `/galeri` |
+| GET | `/api/banner` | `/` (slider) |
+| GET | `/api/artikel` | `/artikel` |
+| GET | `/api/artikel/{slug}` | `/artikel/[slug]` |
+| POST | `/api/pesanan` | `/pesan` |
+
+---
+
+## Cara Install & Jalankan
+
+### Prasyarat
+- Node.js >= 18
+- Backend Laravel sudah jalan di `http://localhost:8000`
+
+### Install
+
+```bash
+git clone <repo-url>
+cd nextjs-pemesanan-hotel
+npm install
+```
+
+### Konfigurasi
+
+```bash
+cp .env.local.example .env.local
+```
+
+Isi `.env.local`:
+NEXT_PUBLIC_API_URL=http://localhost:8000
+
+
+### Jalankan
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# → http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Design System
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Token | Nilai |
+|---|---|
+| Warna brand | `#FF6B00` (oranye) |
+| Background | `#F5F4F2` |
+| Heading | `#121212` |
+| Body text | `#464646` |
+| Font | System default (Tailwind) |
+| Radius card | `rounded-xl` |
+| Radius button | `rounded-lg` |
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## Repo Terkait
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Repo | Teknologi | Keterangan |
+|---|---|---|
+| `hotel-backend` | Laravel 12 + MySQL | REST API + CMS Dashboard |
+| `nextjs-pemesanan-hotel` | Next.js 14 | Halaman publik (repo ini) |
+| `hotel-mobile` | Flutter | Mobile app (belum) |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## Progress
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- [x] Setup project Next.js 14 + TypeScript + Tailwind
+- [x] `.env.local` konfigurasi API URL
+- [x] `src/lib/api.ts` — axios wrapper semua endpoint
+- [x] `src/types/index.ts` — TypeScript interfaces
+- [x] `Navbar.tsx` + `Footer.tsx`
+- [x] `layout.tsx` global
+- [ ] Landing page (`/`)
+- [ ] Katalog kamar (`/kamar`)
+- [ ] Detail kamar (`/kamar/[id]`)
+- [ ] Galeri (`/galeri`)
+- [ ] Artikel (`/artikel`, `/artikel/[slug]`)
+- [ ] Form reservasi (`/pesan`)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+*Terakhir diperbarui: 14 Mei 2026*
+*Next.js 14 | TypeScript | Tailwind CSS | Laravel API*
+'@
+[System.IO.File]::WriteAllText("C:\Users\Hype AMD\nextjs-pemesanan-hotel\README.md", $content, [System.Text.UTF8Encoding]::new($false))
