@@ -1,16 +1,11 @@
-buatkan summary readme.md di next js nya
-
-18:11
-Claude responded: nextjs-pemesanan-hotel ← repo ini (port 3000)
-powershell
-$content = @'
-# nextjs-pemesanan-hotel
+# Frontend_NextJS_Hotel
 
 > Halaman publik hotel berbasis Next.js 14 — mengonsumsi Laravel REST API
 
 ![Next.js](https://img.shields.io/badge/frontend-Next.js%2014-black)
 ![TypeScript](https://img.shields.io/badge/language-TypeScript-blue)
 ![Tailwind](https://img.shields.io/badge/styling-Tailwind%20CSS-38bdf8)
+![Status](https://img.shields.io/badge/status-in%20progress-yellow)
 
 ---
 
@@ -18,17 +13,19 @@ $content = @'
 
 Frontend publik untuk sistem manajemen hotel **The Redison Blue**. Dibangun dengan Next.js 14 App Router, mengonsumsi REST API dari backend Laravel. Halaman ini khusus untuk tamu hotel (guest) — bukan dashboard internal.
 
-Dashboard CMS (admin & resepsionis) tetap di Laravel Blade: `http://localhost:8000`
+> Dashboard CMS (admin & resepsionis) ada di repo terpisah: [Laravel_PemesananHotel](https://github.com/rulifcode/Laravel_PemesananHotel)
 
 ---
 
 ## Arsitektur Sistem
-nextjs-pemesanan-hotel    ← repo ini (port 3000)
-↕ REST API
-hotel-backend (Laravel)   ← port 8000
-↕
-hotel-mobile (Flutter)    ← nanti
 
+```
+Frontend_NextJS_Hotel      ← repo ini (port 3000)
+        ↕ REST API
+Laravel_PemesananHotel     ← port 8000 (CMS + API)
+        ↕
+MySQL Database             ← XAMPP
+```
 
 ---
 
@@ -36,7 +33,7 @@ hotel-mobile (Flutter)    ← nanti
 
 | Route | Halaman | Status |
 |---|---|---|
-| `/` | Landing page + hero + daftar kamar | ⏳ |
+| `/` | Landing page + hero slider + daftar kamar | ✅ |
 | `/kamar` | Katalog semua kamar | ⏳ |
 | `/kamar/[id]` | Detail kamar + fasilitas | ⏳ |
 | `/galeri` | Galeri foto hotel | ⏳ |
@@ -46,11 +43,24 @@ hotel-mobile (Flutter)    ← nanti
 
 ---
 
+## Fitur yang Sudah Jalan
+
+- **Hero Slider** — mendukung gambar, GIF, dan video dari CMS
+- **Auto-advance** — gambar 6 detik, video maju setelah selesai diputar
+- **Fallback** — tampilkan slide Unsplash kalau API Laravel offline
+- **Progress bar** + dot navigator + arrow navigation
+- **Responsive** — mobile & desktop
+- **API Badge** (dev only) — indikator status koneksi ke Laravel
+
+---
+
 ## Struktur Folder
+
+```
 src/
 ├── app/
-│   ├── layout.tsx          ← global layout (Navbar + Footer)
-│   ├── page.tsx            ← landing page
+│   ├── layout.tsx              ← global layout (Navbar + Footer)
+│   ├── page.tsx                ← landing page
 │   ├── kamar/
 │   │   ├── page.tsx
 │   │   └── [id]/page.tsx
@@ -60,13 +70,14 @@ src/
 │   │   └── [slug]/page.tsx
 │   └── pesan/page.tsx
 ├── components/
+│   ├── HeroSection.tsx         ← slider image/gif/video
 │   ├── Navbar.tsx
 │   └── Footer.tsx
 ├── lib/
-│   └── api.ts              ← axios wrapper ke Laravel API
+│   └── api.ts                  ← fetch wrapper ke Laravel API
 └── types/
-└── index.ts            ← TypeScript interfaces
-
+    └── index.ts                ← TypeScript interfaces
+```
 
 ---
 
@@ -76,39 +87,55 @@ Base URL: `http://localhost:8000`
 
 | Method | Endpoint | Dipakai di |
 |---|---|---|
+| GET | `/api/banner` | `/` (hero slider) |
 | GET | `/api/kamar` | `/`, `/kamar` |
 | GET | `/api/kamar/{id}` | `/kamar/[id]` |
 | GET | `/api/galeri` | `/galeri` |
-| GET | `/api/banner` | `/` (slider) |
 | GET | `/api/artikel` | `/artikel` |
 | GET | `/api/artikel/{slug}` | `/artikel/[slug]` |
 | POST | `/api/pesanan` | `/pesan` |
+
+Response `/api/banner`:
+```json
+{
+  "data": [
+    {
+      "id": 1,
+      "judul": "Living Room",
+      "media": "1778764468.jpg",
+      "tipe": "image",
+      "src": "http://localhost:8000/img/banner/1778764468.jpg",
+      "link": ""
+    }
+  ]
+}
+```
 
 ---
 
 ## Cara Install & Jalankan
 
 ### Prasyarat
+
 - Node.js >= 18
 - Backend Laravel sudah jalan di `http://localhost:8000`
+- Repo backend: [Laravel_PemesananHotel](https://github.com/rulifcode/Laravel_PemesananHotel)
 
 ### Install
 
 ```bash
-git clone <repo-url>
-cd nextjs-pemesanan-hotel
+git clone https://github.com/rulifcode/Frontend_NextJS_Hotel.git
+cd Frontend_NextJS_Hotel
 npm install
 ```
 
 ### Konfigurasi
 
+Buat file `.env.local`:
+
 ```bash
-cp .env.local.example .env.local
-```
-
-Isi `.env.local`:
 NEXT_PUBLIC_API_URL=http://localhost:8000
-
+```
 
 ### Jalankan
 
@@ -124,12 +151,11 @@ npm run dev
 | Token | Nilai |
 |---|---|
 | Warna brand | `#FF6B00` (oranye) |
-| Background | `#F5F4F2` |
+| Background gelap | `#0a0a0a` (hero) |
+| Background terang | `#F5F4F2` |
 | Heading | `#121212` |
 | Body text | `#464646` |
-| Font | System default (Tailwind) |
-| Radius card | `rounded-xl` |
-| Radius button | `rounded-lg` |
+| Font | DM Sans (Google Fonts) |
 
 ---
 
@@ -137,30 +163,31 @@ npm run dev
 
 | Repo | Teknologi | Keterangan |
 |---|---|---|
-| `hotel-backend` | Laravel 12 + MySQL | REST API + CMS Dashboard |
-| `nextjs-pemesanan-hotel` | Next.js 14 | Halaman publik (repo ini) |
-| `hotel-mobile` | Flutter | Mobile app (belum) |
+| [Laravel_PemesananHotel](https://github.com/rulifcode/Laravel_PemesananHotel) | Laravel 12 + MySQL | REST API + CMS Dashboard |
+| [Frontend_NextJS_Hotel](https://github.com/rulifcode/Frontend_NextJS_Hotel) | Next.js 14 | Halaman publik (repo ini) |
 
 ---
 
 ## Progress
 
-- [x] Setup project Next.js 14 + TypeScript + Tailwind
-- [x] `.env.local` konfigurasi API URL
-- [x] `src/lib/api.ts` — axios wrapper semua endpoint
-- [x] `src/types/index.ts` — TypeScript interfaces
-- [x] `Navbar.tsx` + `Footer.tsx`
-- [x] `layout.tsx` global
-- [ ] Landing page (`/`)
+### ✅ Selesai
+- [x] Setup Next.js 14 + TypeScript + Tailwind CSS
+- [x] Konfigurasi `next.config.mjs` — remote image dari Laravel
+- [x] `.env.local` — `NEXT_PUBLIC_API_URL`
+- [x] `HeroSection.tsx` — slider image / GIF / video dari API
+- [x] Auto-advance + progress bar + dots + arrows
+- [x] Fallback slides saat API offline
+- [x] Integrasi CORS Laravel ↔ Next.js
+
+### ⏳ Belum Selesai
+- [ ] Landing page lengkap (`/`)
 - [ ] Katalog kamar (`/kamar`)
 - [ ] Detail kamar (`/kamar/[id]`)
-- [ ] Galeri (`/galeri`)
-- [ ] Artikel (`/artikel`, `/artikel/[slug]`)
-- [ ] Form reservasi (`/pesan`)
+- [ ] Galeri foto (`/galeri`)
+- [ ] Artikel & promo (`/artikel`, `/artikel/[slug]`)
+- [ ] Form reservasi publik (`/pesan`)
 
 ---
 
-*Terakhir diperbarui: 14 Mei 2026*
+*Terakhir diperbarui: 15 Mei 2026*
 *Next.js 14 | TypeScript | Tailwind CSS | Laravel API*
-'@
-[System.IO.File]::WriteAllText("C:\Users\Hype AMD\nextjs-pemesanan-hotel\README.md", $content, [System.Text.UTF8Encoding]::new($false))
