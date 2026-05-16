@@ -3,6 +3,14 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 
+const NAV_LINKS = [
+  { label: "Home", href: "/" },
+  { label: "Services", href: "/#why" },
+  { label: "About us", href: "/#about" },
+  { label: "Room", href: "/#room" },
+  { label: "Contact", href: "/#contact" },
+];
+
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -15,45 +23,37 @@ export default function Navbar() {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 h-[72px] flex items-center transition-all duration-300 ${
-        scrolled
-          ? "bg-[#121212]/95 backdrop-blur-sm shadow-[0_2px_20px_rgba(0,0,0,0.4)]"
-          : "bg-transparent"
-      }`}
+      className={`fixed top-0 left-0 right-0 z-50 h-[72px] flex items-center transition-all duration-300 ${scrolled
+        ? "bg-[#121212]/95 backdrop-blur-sm shadow-[0_2px_20px_rgba(0,0,0,0.4)]"
+        : "bg-transparent"
+        }`}
     >
       <div className="max-w-[1200px] w-full mx-auto px-12 flex items-center justify-between">
 
         {/* ── Logo ── */}
-        <Link href="/" className="flex items-center gap-2 group">
-          <span className="w-2 h-2 rounded-full bg-[#FF6B00] transition-transform duration-200 group-hover:scale-125" />
-          <div className="leading-[1.15]">
-            <p className="text-[10px] text-white/55 font-light tracking-[0.25em] uppercase">The</p>
-            <p className="text-white text-[13px] font-bold tracking-[0.12em]">Redison Blue</p>
-          </div>
+        <Link href="/" className="flex items-center group">
+          <img
+            src="/Aurevia_logo.png"
+            alt="The Redison Blue"
+            className="h-20 w-auto object-contain transition-opacity duration-200 group-hover:opacity-80"
+          />
         </Link>
 
+        {/* ── Desktop Nav ── */}
         <nav className="hidden md:flex items-center gap-9">
-          {[
-            { label: "Home",     href: "/" },
-            { label: "Services", href: "/pesan" },
-            { label: "About us", href: "#" },
-            { label: "Room",     href: "/kamar" },
-            { label: "Contact",  href: "#" },
-          ].map((item) => (
+          {NAV_LINKS.map((item) => (
             <Link
               key={item.label}
               href={item.href}
               className="relative text-white/80 hover:text-white text-[13px] font-medium transition-colors duration-200 group"
             >
               {item.label}
-              {/* Underline oranye on hover */}
               <span className="absolute -bottom-1 left-0 w-0 h-px bg-[#FF6B00] transition-all duration-200 group-hover:w-full" />
             </Link>
           ))}
         </nav>
 
-        {/* ── CTA (desktop) ── */}
-        {/* Sesuai Figma: border putih, teks putih — bukan border hitam */}
+        {/* ── CTA Desktop ── */}
         <div className="hidden md:flex items-center gap-3">
           <Link
             href="/pesan"
@@ -75,16 +75,10 @@ export default function Navbar() {
         </button>
       </div>
 
-      {/* ── Mobile dropdown ── */}
+      {/* ── Mobile Dropdown ── */}
       {open && (
         <div className="absolute top-[72px] left-0 right-0 md:hidden bg-[#121212] border-t border-white/10 px-6 pb-6">
-          {[
-            { label: "Home",     href: "/" },
-            { label: "Services", href: "/pesan" },
-            { label: "About us", href: "#" },
-            { label: "Room",     href: "/kamar" },
-            { label: "Contact",  href: "#" },
-          ].map((item) => (
+          {NAV_LINKS.map((item) => (
             <Link
               key={item.label}
               href={item.href}

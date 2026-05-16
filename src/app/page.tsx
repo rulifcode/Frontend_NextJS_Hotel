@@ -6,10 +6,10 @@ import AboutSection from "@/components/sections/AboutSection";
 export default function HomePage() {
   return (
     <>
-      <HeroSection />
+      <HeroSection /> 
       <WhySection />
-      <RoomSection />
-      <AboutSection />
+      <RoomSection /> 
+      <AboutSection /> 
     </>
   );
 }

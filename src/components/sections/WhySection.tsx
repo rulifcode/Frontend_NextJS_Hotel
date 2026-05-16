@@ -33,7 +33,7 @@ export default function WhySection() {
   ];
 
   return (
-    <section className="py-24 px-6 bg-[#F8F8F8] overflow-hidden">
+    <section id="why" className="py-24 px-6 bg-[#F8F8F8] overflow-hidden">
       <div className="max-w-6xl mx-auto">
 
         {/* TOP ICONS */}

@@ -1,8 +1,18 @@
 "use client";
 
 export default function Footer() {
+
+    const quickLinks = [
+        { label: "Home",     href: "/" },
+        { label: "Services", href: "/#why" },
+        { label: "About us", href: "/#about" },
+        { label: "Galeri",   href: "/galeri" },
+        { label: "Artikel",  href: "/artikel" },
+        { label: "Contact",  href: "/#contact" },
+    ];
+
     return (
-        <footer className="bg-[#050505] text-white pt-20">
+        <footer id="contact" className="bg-[#050505] text-white pt-20">
 
             {/* TOP */}
             <div className="max-w-[1200px] mx-auto px-8">
@@ -15,9 +25,9 @@ export default function Footer() {
                             Quick link
                         </h3>
                         <ul className="space-y-5 text-[#C5C5C5] text-[15px]">
-                            {["Home", "Services", "About us", "Contact"].map((item) => (
-                                <li key={item} className="hover:text-[#FF6B00] transition">
-                                    <a href="#">{item}</a>
+                            {quickLinks.map(({ label, href }) => (
+                                <li key={label} className="hover:text-[#FF6B00] transition">
+                                    <a href={href}>{label}</a>
                                 </li>
                             ))}
                         </ul>
@@ -107,10 +117,10 @@ export default function Footer() {
                     <div className="flex items-center justify-end gap-5 text-sm text-[#D6D6D6]">
                         <div className="w-px h-6 bg-[#2A2A2A]"></div>
                         {[
-                            { label: "LinkedIn", href: "https://linkedin.com/in/ruliffadrian" },
+                            { label: "LinkedIn",  href: "https://linkedin.com/in/ruliffadrian" },
                             { label: "Instagram", href: "https://instagram.com/ruliffadrian" },
-                            { label: "GitHub", href: "https://github.com/rulifcode" },
-                            { label: "GitLab", href: "https://gitlab.com/rulifcode" },
+                            { label: "GitHub",    href: "https://github.com/rulifcode" },
+                            { label: "GitLab",    href: "https://gitlab.com/rulifcode" },
                         ].map(({ label, href }) => (
                             <a
                                 key={label}

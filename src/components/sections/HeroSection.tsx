@@ -172,7 +172,7 @@ export default function HeroSection() {
         }
       `}</style>
 
-      <section className="relative w-full min-h-screen overflow-hidden bg-[#0a0a0a]">
+      <section id="home" className="relative w-full min-h-screen overflow-hidden bg-[#0a0a0a]">
 
         {/* ── Slides ── */}
         {slides.map((slide, i) => (

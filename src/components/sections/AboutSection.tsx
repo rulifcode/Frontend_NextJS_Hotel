@@ -35,7 +35,7 @@ export default function AboutSection() {
     ];
 
     return (
-        <section className="bg-[#F3F3F3] overflow-hidden">
+        <section id="about" className="bg-[#F3F3F3] overflow-hidden">
 
             {/* TOP SECTION */}
             <div className="grid lg:grid-cols-[60%_40%] h-[500px]">
