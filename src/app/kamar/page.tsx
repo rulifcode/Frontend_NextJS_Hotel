@@ -1,5 +1,8 @@
 // ============================================================
 // app/kamar/page.tsx — Katalog semua kamar
+// 2 kondisi:
+//   - Laravel online  → data dari API (dinamis)
+//   - Laravel offline → FALLBACK_KAMARS (statis)
 // ============================================================
 
 import Link from "next/link";
@@ -7,18 +10,119 @@ import { getKamars, formatRupiah, getKamarImageUrl } from "@/lib/api";
 import type { Kamar } from "@/types";
 
 export const metadata = {
-  title: "Kamar & Suite — Aurevia Hotel",
-  description: "Temukan kamar terbaik sesuai kebutuhan Anda di Aurevia Hotel.",
+  title: "Kamar & Suite — The Redison Blue",
+  description: "Temukan kamar terbaik sesuai kebutuhan Anda di The Redison Blue.",
 };
 
+// ─────────────────────────────────────────────────────────────
+// FALLBACK — tampil kalau API offline / error
+// ─────────────────────────────────────────────────────────────
+const FALLBACK_KAMARS: Kamar[] = [
+  {
+    id: 1,
+    nama_kamar: "Deluxe Room",
+    tipe_kamar: "Deluxe",
+    harga: 450000,
+    deskripsi: "Kamar nyaman dengan pemandangan kota yang memukau, dilengkapi fasilitas modern.",
+    foto: null,
+    foto_url: "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=800",
+    created_at: "",
+    updated_at: "",
+    fasilitas: [
+      { id: 1, kamar_id: 1, nama_fasilitas: "AC", created_at: "", updated_at: "" },
+      { id: 2, kamar_id: 1, nama_fasilitas: "WiFi", created_at: "", updated_at: "" },
+      { id: 3, kamar_id: 1, nama_fasilitas: "TV", created_at: "", updated_at: "" },
+      { id: 4, kamar_id: 1, nama_fasilitas: "Minibar", created_at: "", updated_at: "" },
+    ],
+  },
+  {
+    id: 2,
+    nama_kamar: "Superior Room",
+    tipe_kamar: "Superior",
+    harga: 350000,
+    deskripsi: "Kamar standar yang luas dan bersih, cocok untuk perjalanan bisnis maupun keluarga.",
+    foto: null,
+    foto_url: "https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=800",
+    created_at: "",
+    updated_at: "",
+    fasilitas: [
+      { id: 5, kamar_id: 2, nama_fasilitas: "AC", created_at: "", updated_at: "" },
+      { id: 6, kamar_id: 2, nama_fasilitas: "WiFi", created_at: "", updated_at: "" },
+      { id: 7, kamar_id: 2, nama_fasilitas: "TV", created_at: "", updated_at: "" },
+    ],
+  },
+  {
+    id: 3,
+    nama_kamar: "Suite Room",
+    tipe_kamar: "Suite",
+    harga: 850000,
+    deskripsi: "Suite mewah dengan ruang tamu terpisah dan pemandangan panorama kota dari lantai tinggi.",
+    foto: null,
+    foto_url: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800",
+    created_at: "",
+    updated_at: "",
+    fasilitas: [
+      { id: 8,  kamar_id: 3, nama_fasilitas: "AC", created_at: "", updated_at: "" },
+      { id: 9,  kamar_id: 3, nama_fasilitas: "WiFi", created_at: "", updated_at: "" },
+      { id: 10, kamar_id: 3, nama_fasilitas: "TV", created_at: "", updated_at: "" },
+      { id: 11, kamar_id: 3, nama_fasilitas: "Bathtub", created_at: "", updated_at: "" },
+      { id: 12, kamar_id: 3, nama_fasilitas: "Minibar", created_at: "", updated_at: "" },
+      { id: 13, kamar_id: 3, nama_fasilitas: "Sofa", created_at: "", updated_at: "" },
+    ],
+  },
+  {
+    id: 4,
+    nama_kamar: "Family Room",
+    tipe_kamar: "Family",
+    harga: 650000,
+    deskripsi: "Kamar luas dengan dua tempat tidur, ideal untuk keluarga dengan anak-anak.",
+    foto: null,
+    foto_url: "https://images.unsplash.com/photo-1618773928121-c32242e63f39?w=800",
+    created_at: "",
+    updated_at: "",
+    fasilitas: [
+      { id: 14, kamar_id: 4, nama_fasilitas: "AC", created_at: "", updated_at: "" },
+      { id: 15, kamar_id: 4, nama_fasilitas: "WiFi", created_at: "", updated_at: "" },
+      { id: 16, kamar_id: 4, nama_fasilitas: "TV", created_at: "", updated_at: "" },
+      { id: 17, kamar_id: 4, nama_fasilitas: "Extra Bed", created_at: "", updated_at: "" },
+    ],
+  },
+  {
+    id: 5,
+    nama_kamar: "Executive Room",
+    tipe_kamar: "Executive",
+    harga: 600000,
+    deskripsi: "Kamar eksekutif dengan sentuhan elegan, dilengkapi meja kerja dan akses lounge eksklusif.",
+    foto: null,
+    foto_url: "https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=800",
+    created_at: "",
+    updated_at: "",
+    fasilitas: [
+      { id: 18, kamar_id: 5, nama_fasilitas: "AC", created_at: "", updated_at: "" },
+      { id: 19, kamar_id: 5, nama_fasilitas: "WiFi", created_at: "", updated_at: "" },
+      { id: 20, kamar_id: 5, nama_fasilitas: "TV", created_at: "", updated_at: "" },
+      { id: 21, kamar_id: 5, nama_fasilitas: "Lounge Access", created_at: "", updated_at: "" },
+      { id: 22, kamar_id: 5, nama_fasilitas: "Desk", created_at: "", updated_at: "" },
+    ],
+  },
+];
+
+// ─────────────────────────────────────────────────────────────
+// PAGE — Server Component
+// ─────────────────────────────────────────────────────────────
 export default async function KamarPage() {
   let kamars: Kamar[] = [];
-  let error = false;
+  let isOffline = false;
 
   try {
-    kamars = await getKamars();
+    const data = await getKamars();
+    // Laravel online tapi data kosong → tetap pakai fallback
+    kamars = data.length > 0 ? data : FALLBACK_KAMARS;
+    isOffline = data.length === 0;
   } catch {
-    error = true;
+    // Laravel offline → pakai fallback
+    kamars = FALLBACK_KAMARS;
+    isOffline = true;
   }
 
   return (
@@ -42,7 +146,7 @@ export default async function KamarPage() {
 
         <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-6">
           <p className="text-[#C9A96E] text-[10px] tracking-[0.4em] uppercase mb-5">
-            ✦ &nbsp; Aurevia Hotel &nbsp; ✦
+            ✦ &nbsp; The Redison Blue &nbsp; ✦
           </p>
           <h1
             className="text-white font-light mb-4"
@@ -71,45 +175,34 @@ export default async function KamarPage() {
       {/* ── CONTENT ──────────────────────────────────────── */}
       <section className="max-w-[1200px] mx-auto px-6 pb-20">
 
-        {/* Error state */}
-        {error && (
-          <div className="text-center py-24 border border-[#E0D8CE] bg-white">
-            <div className="w-12 h-px bg-[#C9A96E] mx-auto mb-6" />
-            <p className="text-[#9A8866] text-sm tracking-widest uppercase mb-2" style={{ fontFamily: "sans-serif" }}>
-              Koneksi Gagal
-            </p>
-            <p className="text-[#3A3228] text-base" style={{ fontFamily: "sans-serif" }}>
-              Gagal memuat data kamar. Periksa koneksi ke API.
-            </p>
+        {/* Dev badge — hanya di development */}
+        {process.env.NODE_ENV === "development" && (
+          <div
+            className={`inline-flex items-center gap-2 text-[11px] font-mono px-3 py-1 rounded-full border mb-6
+              ${isOffline
+                ? "text-amber-600 border-amber-300 bg-amber-50"
+                : "text-green-600 border-green-300 bg-green-50"
+              }`}
+          >
+            <span className={`w-1.5 h-1.5 rounded-full ${isOffline ? "bg-amber-500" : "bg-green-500"}`} />
+            {isOffline ? "offline — fallback data" : "live — data dari API"}
           </div>
         )}
 
-        {/* Empty state */}
-        {!error && kamars.length === 0 && (
-          <div className="text-center py-24 border border-[#E0D8CE] bg-white">
-            <div className="w-12 h-px bg-[#C9A96E] mx-auto mb-6" />
-            <p className="text-[#9A8866] text-sm" style={{ fontFamily: "sans-serif" }}>
-              Belum ada kamar tersedia saat ini.
-            </p>
-          </div>
-        )}
+        {/* Counter */}
+        <p
+          className="text-[#9A8866] text-[11px] tracking-[0.3em] uppercase mb-8"
+          style={{ fontFamily: "sans-serif" }}
+        >
+          {kamars.length} kamar tersedia
+        </p>
 
         {/* Grid kamar */}
-        {kamars.length > 0 && (
-          <>
-            <p
-              className="text-[#9A8866] text-[11px] tracking-[0.3em] uppercase mb-8"
-              style={{ fontFamily: "sans-serif" }}
-            >
-              {kamars.length} kamar tersedia
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {kamars.map((kamar, idx) => (
-                <KamarCard key={kamar.id} kamar={kamar} index={idx} />
-              ))}
-            </div>
-          </>
-        )}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {kamars.map((kamar, idx) => (
+            <KamarCard key={kamar.id} kamar={kamar} index={idx} />
+          ))}
+        </div>
 
       </section>
 
@@ -141,15 +234,20 @@ export default async function KamarPage() {
   );
 }
 
+// ─────────────────────────────────────────────────────────────
+// CARD COMPONENT
+// ─────────────────────────────────────────────────────────────
 function KamarCard({ kamar, index }: { kamar: Kamar; index: number }) {
+  // foto_url diisi dari fallback (Unsplash) atau dari API Laravel
   const imgUrl = getKamarImageUrl(kamar.foto_url ?? kamar.foto);
+  const hasImage = !!(kamar.foto_url ?? kamar.foto);
 
   return (
     <div className="group bg-white border border-[#E8E2D9] hover:border-[#C9A96E]/50 transition-all duration-300 overflow-hidden">
 
       {/* Image */}
       <div className="relative overflow-hidden bg-[#1a1a1a]" style={{ height: "240px" }}>
-        {kamar.foto ? (
+        {hasImage ? (
           <img
             src={imgUrl}
             alt={kamar.nama_kamar}

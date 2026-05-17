@@ -5,13 +5,89 @@ import { useEffect, useState } from "react";
 import { getGaleris, getGaleriImageUrl } from "@/lib/api";
 import type { Galeri } from "@/types";
 
+// ─────────────────────────────────────────────────────────────
+// FALLBACK — tampil kalau API offline / error
+// ─────────────────────────────────────────────────────────────
+const FALLBACK_GALERI: Galeri[] = [
+  {
+    id: 1,
+    judul: "Deluxe Room",
+    foto: null,
+    foto_url: "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=800",
+    created_at: "",
+    updated_at: "",
+  },
+  {
+    id: 2,
+    judul: "Superior Room",
+    foto: null,
+    foto_url: "https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=800",
+    created_at: "",
+    updated_at: "",
+  },
+  {
+    id: 3,
+    judul: "Suite Room",
+    foto: null,
+    foto_url: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800",
+    created_at: "",
+    updated_at: "",
+  },
+  {
+    id: 4,
+    judul: "Family Room",
+    foto: null,
+    foto_url: "https://images.unsplash.com/photo-1618773928121-c32242e63f39?w=800",
+    created_at: "",
+    updated_at: "",
+  },
+  {
+    id: 5,
+    judul: "Executive Room",
+    foto: null,
+    foto_url: "https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=800",
+    created_at: "",
+    updated_at: "",
+  },
+];
+
+// Jumlah tamu per id — fallback statis, data API tidak punya field ini
+const GUEST_MAP: Record<number, number> = { 1: 2, 2: 2, 3: 3, 4: 4, 5: 2 };
+
+// ─────────────────────────────────────────────────────────────
+// HELPER — resolve URL gambar
+// Prioritas: foto_url (Cloudinary/Supabase) → getGaleriImageUrl (Laravel) → ""
+// ─────────────────────────────────────────────────────────────
+function resolveImageUrl(item: Galeri): string {
+  if (item.foto_url) return item.foto_url;
+  if (item.foto) return getGaleriImageUrl(item.foto);
+  return "";
+}
+
+// ─────────────────────────────────────────────────────────────
+// MAIN COMPONENT
+// ─────────────────────────────────────────────────────────────
 export default function RoomSection() {
   const [galeri, setGaleri] = useState<Galeri[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isOffline, setIsOffline] = useState(false);
 
   useEffect(() => {
+    // Coba fetch dari API (Laravel / Supabase)
+    // Kalau berhasil → pakai data API
+    // Kalau gagal → otomatis pakai FALLBACK_GALERI
     getGaleris()
-      .then((data) => setGaleri(data.slice(0, 5)))
-      .catch(console.error);
+      .then((data) => {
+        const result = data.slice(0, 5);
+        // Kalau API balik array kosong, tetap pakai fallback
+        setGaleri(result.length > 0 ? result : FALLBACK_GALERI);
+        setIsOffline(result.length === 0);
+      })
+      .catch(() => {
+        setGaleri(FALLBACK_GALERI);
+        setIsOffline(true);
+      })
+      .finally(() => setLoading(false));
   }, []);
 
   return (
@@ -34,29 +110,62 @@ export default function RoomSection() {
           </p>
         </div>
 
-        {/* DESKTOP */}
-        <div className="hidden lg:grid grid-cols-[1fr_1.3fr_1fr] gap-8 items-start">
-          <div className="space-y-8">
-            {galeri[0] && <Card item={galeri[0]} height="h-[240px]" />}
-            {galeri[1] && <Card item={galeri[1]} height="h-[240px]" />}
+        {/* DEV BADGE — hanya tampil di development */}
+        {process.env.NODE_ENV === "development" && !loading && (
+          <div
+            className={`text-center mb-6 text-[11px] font-mono px-3 py-1 inline-flex items-center gap-2 rounded-full border mx-auto w-fit
+              ${isOffline
+                ? "text-amber-600 border-amber-300 bg-amber-50"
+                : "text-green-600 border-green-300 bg-green-50"
+              }`}
+          >
+            <span className={`w-1.5 h-1.5 rounded-full ${isOffline ? "bg-amber-500" : "bg-green-500"}`} />
+            {isOffline ? "offline — fallback data" : "live — data dari API"}
           </div>
-          <div>
-            {galeri[2] && <Card item={galeri[2]} height="h-[540px]" big />}
-          </div>
-          <div className="space-y-8">
-            {galeri[3] && <Card item={galeri[3]} height="h-[240px]" />}
-            {galeri[4] && <Card item={galeri[4]} height="h-[240px]" />}
-          </div>
-        </div>
+        )}
 
-        {/* MOBILE */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 lg:hidden mt-10">
-          {galeri.map((item) => (
-            <Card key={item.id} item={item} height="h-[260px]" />
-          ))}
-        </div>
+        {/* SKELETON */}
+        {loading && (
+          <div className="hidden lg:grid grid-cols-[1fr_1.3fr_1fr] gap-8 items-start animate-pulse">
+            <div className="space-y-8">
+              <div className="h-[240px] bg-[#E4E4E4]" />
+              <div className="h-[240px] bg-[#E4E4E4]" />
+            </div>
+            <div className="h-[540px] bg-[#E4E4E4]" />
+            <div className="space-y-8">
+              <div className="h-[240px] bg-[#E4E4E4]" />
+              <div className="h-[240px] bg-[#E4E4E4]" />
+            </div>
+          </div>
+        )}
 
-        {/* EXPLORE BUTTON */}
+        {/* DESKTOP GRID */}
+        {!loading && (
+          <>
+            <div className="hidden lg:grid grid-cols-[1fr_1.3fr_1fr] gap-8 items-start">
+              <div className="space-y-8">
+                {galeri[0] && <Card item={galeri[0]} height="h-[240px]" />}
+                {galeri[1] && <Card item={galeri[1]} height="h-[240px]" />}
+              </div>
+              <div>
+                {galeri[2] && <Card item={galeri[2]} height="h-[540px]" big />}
+              </div>
+              <div className="space-y-8">
+                {galeri[3] && <Card item={galeri[3]} height="h-[240px]" />}
+                {galeri[4] && <Card item={galeri[4]} height="h-[240px]" />}
+              </div>
+            </div>
+
+            {/* MOBILE GRID */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 lg:hidden mt-10">
+              {galeri.map((item) => (
+                <Card key={item.id} item={item} height="h-[260px]" />
+              ))}
+            </div>
+          </>
+        )}
+
+        {/* CTA */}
         <div className="flex flex-col items-center mt-16 gap-4">
           <p className="text-[#9A9A9A] text-sm">
             Temukan kamar yang sempurna untuk Anda
@@ -77,6 +186,9 @@ export default function RoomSection() {
   );
 }
 
+// ─────────────────────────────────────────────────────────────
+// CARD COMPONENT
+// ─────────────────────────────────────────────────────────────
 function Card({
   item,
   height,
@@ -86,13 +198,14 @@ function Card({
   height: string;
   big?: boolean;
 }) {
-  const imgSrc = getGaleriImageUrl(item.foto_url ?? item.foto);
+  const imgSrc = resolveImageUrl(item);
+  const guests = GUEST_MAP[item.id] ?? 2;
 
   return (
     <div className="group">
       {/* IMAGE */}
       <div className={`overflow-hidden bg-[#ECECEC] ${height}`}>
-        {item.foto ? (
+        {imgSrc ? (
           <img
             src={imgSrc}
             alt={item.judul}
@@ -105,10 +218,10 @@ function Card({
         )}
       </div>
 
-      {/* CONTENT */}
+      {/* TEXT */}
       <div className="pt-3">
         <p className="text-[11px] uppercase font-semibold tracking-wide text-[#A8A8A8] mb-1">
-          {Math.floor(Math.random() * 6) + 1} Guests
+          {guests} Guests
         </p>
         <h3
           className={`font-bold text-[#121212] leading-tight ${

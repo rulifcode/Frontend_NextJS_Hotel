@@ -14,15 +14,16 @@ interface Slide {
 }
 
 // ── Fallback jika API offline ──────────────────────────────────────────────
+// Video: pakai free stock dari Pexels (no attribution required for embedding)
 const FALLBACK_SLIDES: Slide[] = [
   {
-    type: "image",
-    src: "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=1600&q=80",
+    type: "video",
+    src: "/Video_Hotel.mp4",  // dari public folder
     alt: "Hotel Lobby",
   },
   {
     type: "image",
-    src: "https://images.unsplash.com/photo-1618773928121-c32242e63f39?w=1600&q=80",
+    src: "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=1600&q=80",
     alt: "Luxury Room",
   },
   {
@@ -32,10 +33,9 @@ const FALLBACK_SLIDES: Slide[] = [
   },
 ];
 
-const SLIDE_DURATION = 6000; // ms untuk image/gif
+const SLIDE_DURATION = 6000; // ms untuk image / gif
 
 // ── Helper: map response API Laravel → Slide[] ────────────────────────────
-// Support field: media (baru), gambar/foto/image/url (lama/fallback)
 function mapBannersToSlides(raw: unknown, baseUrl: string): Slide[] {
   const arr = Array.isArray(raw)
     ? raw
@@ -46,26 +46,16 @@ function mapBannersToSlides(raw: unknown, baseUrl: string): Slide[] {
     .map((b) => {
       const item = b as Record<string, string>;
 
-      // Prioritaskan field 'media' (kolom baru), fallback ke yang lama
       const mediaField: string =
-        item.media ||
-        item.gambar ||
-        item.foto ||
-        item.image ||
-        item.url ||
-        "";
-
+        item.media || item.gambar || item.foto || item.image || item.url || "";
       if (!mediaField) return null;
 
-      // Kalau sudah full URL (http/https), pakai langsung
-      // Kalau path relatif, gabung dengan baseUrl Laravel
       const src = mediaField.startsWith("http")
         ? mediaField
         : `${baseUrl}/img/banner/${mediaField}`;
 
       const alt: string = item.judul || item.title || "Banner";
 
-      // Deteksi tipe dari field 'tipe' (Laravel) atau ekstensi file
       let type: SlideType = "image";
       if (item.tipe === "video" || /\.(mp4|webm|ogg)$/i.test(mediaField)) {
         type = "video";
@@ -82,9 +72,6 @@ function mapBannersToSlides(raw: unknown, baseUrl: string): Slide[] {
 export default function HeroSection() {
   const [slides, setSlides] = useState<Slide[]>(FALLBACK_SLIDES);
   const [current, setCurrent] = useState(0);
-  const [apiStatus, setApiStatus] = useState<"loading" | "ok" | "fallback">(
-    "loading"
-  );
 
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -105,14 +92,11 @@ export default function HeroSection() {
         const json = await res.json();
         const mapped = mapBannersToSlides(json, baseUrl);
 
-        if (mapped.length > 0) {
-          setSlides(mapped);
-          setApiStatus("ok");
-        } else {
-          setApiStatus("fallback");
-        }
+        // Kalau API ada data → pakai, termasuk kalau ada slide video dari CMS
+        // Kalau kosong → tetap pakai FALLBACK_SLIDES (ada video-nya)
+        if (mapped.length > 0) setSlides(mapped);
       } catch {
-        if (!controller.signal.aborted) setApiStatus("fallback");
+        // API offline → FALLBACK_SLIDES sudah ter-set dari useState
       }
     }
 
@@ -128,8 +112,6 @@ export default function HeroSection() {
 
   useEffect(() => {
     const slide = slides[current];
-    // Video: tunggu sampai ended lewat event, bukan timer — tapi fallback 15s
-    // GIF & image: pakai SLIDE_DURATION
     const duration = slide?.type === "video" ? 15000 : SLIDE_DURATION;
 
     timerRef.current = setTimeout(() => {
@@ -141,7 +123,7 @@ export default function HeroSection() {
     };
   }, [current, slides]);
 
-  // ── Autoplay video + advance saat video ended ─────────────────────────
+  // ── Autoplay video + advance saat ended ───────────────────────────────
   useEffect(() => {
     const vid = videoRef.current;
     if (!vid) return;
@@ -149,12 +131,10 @@ export default function HeroSection() {
     vid.currentTime = 0;
     vid.play().catch(() => {});
 
-    // Kalau video selesai sebelum timeout → langsung next slide
     const onEnded = () => {
-      if (slides.length > 1) {
-        goTo((current + 1) % slides.length);
-      }
+      if (slides.length > 1) goTo((current + 1) % slides.length);
     };
+
     vid.addEventListener("ended", onEnded);
     return () => vid.removeEventListener("ended", onEnded);
   }, [current, slides, goTo]);
@@ -172,8 +152,10 @@ export default function HeroSection() {
         }
       `}</style>
 
-      <section id="home" className="relative w-full min-h-screen overflow-hidden bg-[#0a0a0a]">
-
+      <section
+        id="home"
+        className="relative w-full min-h-screen overflow-hidden bg-[#0a0a0a]"
+      >
         {/* ── Slides ── */}
         {slides.map((slide, i) => (
           <div
@@ -189,12 +171,9 @@ export default function HeroSection() {
                 autoPlay
                 muted
                 playsInline
-                // Tidak pakai loop — biar onEnded bisa trigger next slide
                 className="absolute inset-0 w-full h-full object-cover"
               />
             ) : (
-              // image & gif keduanya pakai <img> biasa via unoptimized
-              // GIF: Next/Image dengan unoptimized agar animasi gif tetap jalan
               <Image
                 src={slide.src}
                 alt={slide.alt}
@@ -277,9 +256,7 @@ export default function HeroSection() {
 
         {/* ── Arrows ── */}
         <button
-          onClick={() =>
-            goTo((current - 1 + slides.length) % slides.length)
-          }
+          onClick={() => goTo((current - 1 + slides.length) % slides.length)}
           className="absolute left-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 border border-white/20 text-white/60 hover:border-[#FF6B00] hover:text-[#FF6B00] flex items-center justify-center transition-all"
           aria-label="Slide sebelumnya"
         >
@@ -303,25 +280,6 @@ export default function HeroSection() {
             }}
           />
         </div>
-
-        {/* ── Dev: API status badge ── */}
-        {process.env.NODE_ENV === "development" && (
-          <div
-            className={`absolute top-[88px] right-12 z-30 text-[11px] px-3 py-1.5 font-medium tracking-wide transition-all ${
-              apiStatus === "ok"
-                ? "bg-emerald-500/15 border border-emerald-500/30 text-emerald-400"
-                : apiStatus === "fallback"
-                ? "bg-orange-500/10 border border-orange-500/20 text-orange-400/70"
-                : "bg-white/5 border border-white/10 text-white/40"
-            }`}
-          >
-            {apiStatus === "ok"
-              ? `✓ ${slides.length} banner dari API`
-              : apiStatus === "fallback"
-              ? "↻ Fallback (API offline)"
-              : "⟳ Loading banners…"}
-          </div>
-        )}
       </section>
     </>
   );
