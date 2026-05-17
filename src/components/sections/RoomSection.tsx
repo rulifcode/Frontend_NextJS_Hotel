@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { getGaleris, getGaleriImageUrl } from "@/lib/api";
 import type { Galeri } from "@/types";
@@ -56,7 +57,6 @@ const GUEST_MAP: Record<number, number> = { 1: 2, 2: 2, 3: 3, 4: 4, 5: 2 };
 
 // ─────────────────────────────────────────────────────────────
 // HELPER — resolve URL gambar
-// Prioritas: foto_url (Cloudinary/Supabase) → getGaleriImageUrl (Laravel) → ""
 // ─────────────────────────────────────────────────────────────
 function resolveImageUrl(item: Galeri): string {
   if (item.foto_url) return item.foto_url;
@@ -73,13 +73,9 @@ export default function RoomSection() {
   const [isOffline, setIsOffline] = useState(false);
 
   useEffect(() => {
-    // Coba fetch dari API (Laravel / Supabase)
-    // Kalau berhasil → pakai data API
-    // Kalau gagal → otomatis pakai FALLBACK_GALERI
     getGaleris()
       .then((data) => {
         const result = data.slice(0, 5);
-        // Kalau API balik array kosong, tetap pakai fallback
         setGaleri(result.length > 0 ? result : FALLBACK_GALERI);
         setIsOffline(result.length === 0);
       })
@@ -110,7 +106,7 @@ export default function RoomSection() {
           </p>
         </div>
 
-        {/* DEV BADGE — hanya tampil di development */}
+        {/* DEV BADGE */}
         {process.env.NODE_ENV === "development" && !loading && (
           <div
             className={`text-center mb-6 text-[11px] font-mono px-3 py-1 inline-flex items-center gap-2 rounded-full border mx-auto w-fit
@@ -204,12 +200,14 @@ function Card({
   return (
     <div className="group">
       {/* IMAGE */}
-      <div className={`overflow-hidden bg-[#ECECEC] ${height}`}>
+      <div className={`relative overflow-hidden bg-[#ECECEC] ${height}`}>
         {imgSrc ? (
-          <img
+          <Image
             src={imgSrc}
             alt={item.judul}
-            className="w-full h-full object-cover group-hover:scale-105 transition duration-700"
+            fill
+            className="object-cover group-hover:scale-105 transition duration-700"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-[#BDBDBD] text-sm">

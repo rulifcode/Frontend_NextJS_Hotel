@@ -4,7 +4,7 @@
 // app/pesan/page.tsx — Form Reservasi Publik (Elegant Redesign)
 // ============================================================
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { getKamars, getBanners, createPesanan, formatRupiah, hitungTotal } from "@/lib/api";
@@ -49,7 +49,10 @@ const FALLBACK_BANNERS: Banner[] = [
   { id: 4, judul: "Suite", tipe: "image", src: "https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=800&q=80", media: null, link: null, aktif: true, urutan: 4, created_at: "", updated_at: "" },
 ];
 
-export default function PesanPage() {
+// ─────────────────────────────────────────────────────────────
+// INNER COMPONENT — semua logic ada di sini
+// ─────────────────────────────────────────────────────────────
+function PesanContent() {
   const searchParams = useSearchParams();
 
   const [kamars, setKamars]   = useState<Kamar[]>([]);
@@ -90,7 +93,6 @@ export default function PesanPage() {
     if (!current) return;
 
     if (current.tipe === "video") {
-      // Let the video's onEnded handler advance
       return;
     }
 
@@ -109,8 +111,6 @@ export default function PesanPage() {
       videoRef.current.play().catch(() => {});
     }
   }, [activeIdx, banners]);
-
-
 
   const selectedKamar = kamars.find((k) => String(k.id) === form.kamar_id);
   const malamCount =
@@ -620,6 +620,28 @@ export default function PesanPage() {
       </div>
 
     </main>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// PAGE EXPORT — bungkus PesanContent dengan Suspense
+// ─────────────────────────────────────────────────────────────
+export default function PesanPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-[#F7F5F0] flex items-center justify-center">
+          <p
+            className="text-[#9A8866] text-sm tracking-widest uppercase"
+            style={{ fontFamily: "sans-serif" }}
+          >
+            Memuat...
+          </p>
+        </div>
+      }
+    >
+      <PesanContent />
+    </Suspense>
   );
 }
 

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import {
     Coffee,
     HeartPulse,
@@ -63,10 +64,12 @@ export default function AboutSection() {
 
                 {/* RIGHT IMAGE */}
                 <div className="relative h-[500px]">
-                    <img
+                    <Image
                         src={heroImage}
                         alt="Hotel"
-                        className="absolute inset-0 w-full h-full object-cover"
+                        fill
+                        className="object-cover"
+                        sizes="40vw"
                     />
                 </div>
 
@@ -90,12 +93,15 @@ export default function AboutSection() {
                         </p>
                         <div className="flex items-center -space-x-3 mb-5">
                             {[1, 2, 3, 4, 5].map((i) => (
-                                <img
-                                    key={i}
-                                    src={`https://i.pravatar.cc/100?img=${i + 10}`}
-                                    alt=""
-                                    className="w-10 h-10 rounded-full border-[3px] border-[#F3F3F3] object-cover"
-                                />
+                                <div key={i} className="relative w-10 h-10">
+                                    <Image
+                                        src={`https://i.pravatar.cc/100?img=${i + 10}`}
+                                        alt=""
+                                        fill
+                                        className="rounded-full border-[3px] border-[#F3F3F3] object-cover"
+                                        sizes="40px"
+                                    />
+                                </div>
                             ))}
                         </div>
                         <p className="text-[#7B7B7B] text-[13px] leading-6 max-w-[150px]">

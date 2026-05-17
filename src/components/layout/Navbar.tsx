@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState, useEffect } from "react";
 
 const NAV_LINKS = [
@@ -32,9 +33,11 @@ export default function Navbar() {
 
         {/* ── Logo ── */}
         <Link href="/" className="flex items-center group">
-          <img
+          <Image
             src="/Aurevia_logo.png"
             alt="The Redison Blue"
+            width={160}
+            height={80}
             className="h-20 w-auto object-contain transition-opacity duration-200 group-hover:opacity-80"
           />
         </Link>
